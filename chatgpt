@@ -1,0 +1,45 @@
+
+#!/bin/bash
+
+# Verificar que se ingresen exactamente 2 argumentos
+if [ $# -lt 2 ]; then
+    echo "Error: faltan argumentos."
+    echo "Uso: $0 <palabra> <carpeta>"
+    exit 1
+elif [ $# -gt 2 ]; then
+    echo "Error: sobran argumentos. Solo debes ingresar 2."
+    exit 1
+fi
+
+# Guardar los argumentos en variables
+palabra="$1"
+carpeta="$2"
+
+# Verificar que la palabra no esté vacía
+if [ -z "$palabra" ]; then
+    echo "Error: debes escribir una palabra o frase."
+    exit 1
+fi
+
+# Verificar que la carpeta exista
+if [ ! -d "$carpeta" ]; then
+    echo "Error: la carpeta no existe."
+    exit 1
+fi
+
+# Buscar la palabra en los archivos
+echo "Buscando '$palabra' en '$carpeta'..."
+
+encontrados=0
+
+while IFS= read -r -d '' archivo; do
+    if grep -Fq -- "$palabra" "$archivo" 2>/dev/null; then
+        echo "$archivo"
+        encontrados=$((encontrados + 1))
+    fi
+done < <(find "$carpeta" -type f -print0)
+
+# Mostrar mensaje si no se encontraron coincidencias
+if [ "$encontrados" -eq 0 ]; then
+    echo "No se encontraron archivos con esa palabra."
+fi
